@@ -39,5 +39,17 @@ RSpec.describe 'Registration endpoint' do
     end
   end
 
-  xit 'should fail on wrong username format'
+  it 'should fail on wrong username format' do
+    invalid_username = 'Stephen'
+    url = "#{base_url}?#{required_params}&username=#{invalid_username}&password=#{password}"
+    begin
+      RestClient.post url, {}
+    rescue => e
+      expect(e.response.code).to eq(400)
+      response_body = JSON.parse(e.response.body)['meta']
+      expect(response_body['error_type']).to eq('invalid_param')
+      expect(response_body['error_param']).to eq('username')
+      expect(response_body['error_message']).to match(/^Username isn't in the right format/)
+    end
+  end
 end
