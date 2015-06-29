@@ -1,4 +1,5 @@
 require 'rest-client'
+require 'json'
 require 'pry'
 
 RSpec.describe 'Registration endpoint' do
@@ -9,12 +10,24 @@ RSpec.describe 'Registration endpoint' do
 
   it 'should register user with correct parameters' do
     url = "#{base_url}?#{required_params}&username=#{valid_username}&password=#{password}"
-
     result = RestClient.post url, {}
     expect(result.body).to eq(%({"meta":{"status":201}}))
   end
 
-  it 'should return error on non unique username'
+  it 'should return error on non unique username' do
+    url = "#{base_url}?#{required_params}&username=#{valid_username}&password=#{password}"
+    begin
+      2.times { RestClient.post url, {} }
+    rescue => e
+      expect(e.response.code).to eq(400)
+      response_body = JSON.parse(e.response.body)['meta']
+      expect(response_body['error_type']).to eq('non_unique_param')
+      expect(response_body['error_param']).to eq('username')
+      expect(response_body['error_message']).to match(/^customer already registered/)
+      #expect(response_body).to have_key('error_id') # It is absent at the moment
+    end
+  end
+
   it 'should fail when required params are missing'
   xit 'should fail on wrong username format'
 end
