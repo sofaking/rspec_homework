@@ -10,8 +10,9 @@ RSpec.describe 'Registration endpoint' do
   let(:valid_registration_url) { "#{base_url}?#{required_params}&username=#{valid_username}&password=#{password}" }
 
   it 'should register user with correct parameters' do
-    result = RestClient.post valid_registration_url, {}
-    expect(result.body).to eq(%({"meta":{"status":201}}))
+    response = RestClient.post valid_registration_url, {}
+    expect(response.code).to eq(201)
+    expect(response.body).to eq(%({"meta":{"status":201}}))
   end
 
   it 'should return error on non unique username' do
