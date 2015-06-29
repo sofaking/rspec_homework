@@ -28,6 +28,16 @@ RSpec.describe 'Registration endpoint' do
     end
   end
 
-  it 'should fail when required params are missing'
+  it 'should fail when required params are missing' do
+    url_without_required_params = "#{base_url}?username=#{valid_username}&password=#{password}"
+    begin
+      RestClient.post url_without_required_params, {}
+    rescue => e
+      expect(e.response.code).to eq(401)
+      response_body = JSON.parse(e.response.body)
+      expect(response_body['error']).to eq('invalid_client')
+    end
+  end
+
   xit 'should fail on wrong username format'
 end
