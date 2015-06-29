@@ -7,17 +7,16 @@ RSpec.describe 'Registration endpoint' do
   let(:valid_username) { "apitester#{SecureRandom.uuid}@acme.com" }
   let(:password) { 'password' }
   let(:required_params) { 'client_id=spbtv-interview&client_version=0.1.0&locale=en_GB&timezone=0' }
+  let(:valid_registration_url) { "#{base_url}?#{required_params}&username=#{valid_username}&password=#{password}" }
 
   it 'should register user with correct parameters' do
-    url = "#{base_url}?#{required_params}&username=#{valid_username}&password=#{password}"
-    result = RestClient.post url, {}
+    result = RestClient.post valid_registration_url, {}
     expect(result.body).to eq(%({"meta":{"status":201}}))
   end
 
   it 'should return error on non unique username' do
-    url = "#{base_url}?#{required_params}&username=#{valid_username}&password=#{password}"
     begin
-      2.times { RestClient.post url, {} }
+      2.times { RestClient.post valid_registration_url, {} }
     rescue => e
       expect(e.response.code).to eq(400)
       response_body = JSON.parse(e.response.body)['meta']
