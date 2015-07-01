@@ -65,4 +65,14 @@ RSpec.describe 'Authentication endpoint' do
       expect(response_body['error_description']).to eq('Cannot determine authentication method')
     end
   end
+
+  xit 'should fail if parameters passed via json' do
+    register_user
+    url_without_params, params = valid_authentication_url.split('?')
+    params_hash = Hash[*params.split(/=|&/)]
+
+    RestClient.post(url_without_params, params_hash.to_json, content_type: :json) do |response, request, result|
+      # it doesn't fail actually. Should it?
+    end
+  end
 end
