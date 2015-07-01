@@ -14,8 +14,12 @@ RSpec.describe 'Authentication endpoint' do
     "#{authentication_base_url}?#{required_params}&#{required_authentication_param}&username=#{valid_username}&password=#{password}"
   end
 
-  it 'should return access token for valid user' do
+  def register_user
     RestClient.post valid_registration_url, {}
+  end
+
+  it 'should return access token for valid user' do
+    register_user
     response = RestClient.post valid_authentication_url, {}
 
     expect(response.code).to eq(200)
@@ -25,7 +29,7 @@ RSpec.describe 'Authentication endpoint' do
   end
 
   it 'should fail for unknown user' do
-    RestClient.post valid_registration_url, {}
+    register_user
     authentication_url_with_unknown_username =
       "#{authentication_base_url}?#{required_params}&#{required_authentication_param}&username=unknown_user@acme.com&password=#{password}"
     begin
@@ -39,7 +43,7 @@ RSpec.describe 'Authentication endpoint' do
   end
 
   it 'should fail if password is wrong' do
-    RestClient.post valid_registration_url, {}
+    register_user
     authentication_url_with_wrong_password =
       "#{authentication_base_url}?#{required_params}&#{required_authentication_param}&username=#{valid_username}&password=wrong_one"
     begin
