@@ -32,11 +32,10 @@ RSpec.describe 'Authentication endpoint' do
     register_user
     authentication_url_with_unknown_username =
       "#{authentication_base_url}?#{required_params}&#{required_authentication_param}&username=unknown_user@acme.com&password=#{password}"
-    begin
-      RestClient.post authentication_url_with_unknown_username, {}
-    rescue => e
-      expect(e.response.code).to eq(401)
-      response_body = JSON.parse(e.response.body)
+
+    RestClient.post(authentication_url_with_unknown_username, {}) do |response|
+      expect(response.code).to eq(401)
+      response_body = JSON.parse(response.body)
       expect(response_body['error']).to eq('invalid_client')
       expect(response_body['error_description']).to eq('Incorrect username or password')
     end
@@ -46,11 +45,10 @@ RSpec.describe 'Authentication endpoint' do
     register_user
     authentication_url_with_wrong_password =
       "#{authentication_base_url}?#{required_params}&#{required_authentication_param}&username=#{valid_username}&password=wrong_one"
-    begin
-      RestClient.post authentication_url_with_wrong_password, {}
-    rescue => e
-      expect(e.response.code).to eq(401)
-      response_body = JSON.parse(e.response.body)
+
+    RestClient.post(authentication_url_with_wrong_password, {}) do |response|
+      expect(response.code).to eq(401)
+      response_body = JSON.parse(response.body)
       expect(response_body['error']).to eq('invalid_client')
       expect(response_body['error_description']).to eq('Incorrect username or password')
     end
@@ -59,11 +57,10 @@ RSpec.describe 'Authentication endpoint' do
   it 'should fail when required parameters are omitted' do
     register_user
     url_with_required_param_omitted = "#{authentication_base_url}?#{required_params}&username=#{valid_username}&password=#{password}"
-    begin
-      RestClient.post url_with_required_param_omitted, {}
-    rescue => e
-      expect(e.response.code).to eq(400)
-      response_body = JSON.parse(e.response.body)
+
+    RestClient.post(url_with_required_param_omitted, {}) do |response|
+      expect(response.code).to eq(400)
+      response_body = JSON.parse(response.body)
       expect(response_body['error']).to eq('authentication_required')
       expect(response_body['error_description']).to eq('Cannot determine authentication method')
     end
