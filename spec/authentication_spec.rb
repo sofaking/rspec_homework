@@ -56,5 +56,16 @@ RSpec.describe 'Authentication endpoint' do
     end
   end
 
-  xit 'should fail when required parameters are omitted'
+  it 'should fail when required parameters are omitted' do
+    register_user
+    url_with_required_param_omitted = "#{authentication_base_url}?#{required_params}&username=#{valid_username}&password=#{password}"
+    begin
+      RestClient.post url_with_required_param_omitted, {}
+    rescue => e
+      expect(e.response.code).to eq(400)
+      response_body = JSON.parse(e.response.body)
+      expect(response_body['error']).to eq('authentication_required')
+      expect(response_body['error_description']).to eq('Cannot determine authentication method')
+    end
+  end
 end
