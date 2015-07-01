@@ -24,7 +24,33 @@ RSpec.describe 'Authentication endpoint' do
     expect(response_body['access_token']).not_to be_empty
   end
 
-  xit 'should fail for unknown user'
-  xit 'should fail if password is wrong'
+  it 'should fail for unknown user' do
+    RestClient.post valid_registration_url, {}
+    authentication_url_with_unknown_username =
+      "#{authentication_base_url}?#{required_params}&#{required_authentication_param}&username=unknown_user@acme.com&password=#{password}"
+    begin
+      RestClient.post authentication_url_with_unknown_username, {}
+    rescue => e
+      expect(e.response.code).to eq(401)
+      response_body = JSON.parse(e.response.body)
+      expect(response_body['error']).to eq('invalid_client')
+      expect(response_body['error_description']).to eq('Incorrect username or password')
+    end
+  end
+
+  it 'should fail if password is wrong' do
+    RestClient.post valid_registration_url, {}
+    authentication_url_with_wrong_password =
+      "#{authentication_base_url}?#{required_params}&#{required_authentication_param}&username=#{valid_username}&password=wrong_one"
+    begin
+      RestClient.post authentication_url_with_wrong_password, {}
+    rescue => e
+      expect(e.response.code).to eq(401)
+      response_body = JSON.parse(e.response.body)
+      expect(response_body['error']).to eq('invalid_client')
+      expect(response_body['error_description']).to eq('Incorrect username or password')
+    end
+  end
+
   xit 'should fail when required parameters are omitted'
 end
